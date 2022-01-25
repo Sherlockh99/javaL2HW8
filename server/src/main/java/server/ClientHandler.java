@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ClientHandler {
     private Server server;
@@ -26,7 +27,7 @@ public class ClientHandler {
 
             new Thread(() -> {
                 try {
-//                    socket.setSoTimeout(0);
+                    socket.setSoTimeout(120000);
                     //цикл аутентификации
                     while (true) {
                         String str = in.readUTF();
@@ -72,6 +73,9 @@ public class ClientHandler {
                             }
                         }
                     }
+                    if(authenticated){
+                        socket.setSoTimeout(0);
+                    }
                     //цикл работы
                     while (authenticated) {
                         String str = in.readUTF();
@@ -94,7 +98,8 @@ public class ClientHandler {
                         }
                     }
 
-                    //SocketTimeoutException
+                }catch (SocketTimeoutException e){
+                    sendMsg("/end");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {

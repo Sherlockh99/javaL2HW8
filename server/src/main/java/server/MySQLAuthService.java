@@ -13,6 +13,7 @@ public class MySQLAuthService implements AuthService{
 
     public MySQLAuthService(){
         try {
+
             connect();
             psInsert = connection.prepareStatement("INSERT INTO users (login, password, nickname) VALUES ( ? , ? , ?);");
             psSelectLoginWithSelectionLogin = connection.prepareStatement("SELECT  login FROM users WHERE login = ? OR nickname = ?;");
@@ -20,7 +21,6 @@ public class MySQLAuthService implements AuthService{
             psSelectUser = connection.prepareStatement("SELECT login, nickname FROM users WHERE nickname = ?;");
             psUpdateNickname = connection.prepareStatement("UPDATE users SET nickname = ? WHERE login = ?;");
 
-            //psSelectWithSelectionLogin = connection.prepareStatement("SELECT login, password, nickname FROM users WHERE login = ?;");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,14 +43,6 @@ public class MySQLAuthService implements AuthService{
         }catch (SQLException e) {
             return null;
         }
-
-        /*
-        for (SimpleAuthService.UserData user : users) {
-            if (user.login.equals(login) && user.password.equals(password)) {
-                return user.nickname;
-            }
-        } */
-        //return null;
 
     }
 
@@ -94,8 +86,8 @@ public class MySQLAuthService implements AuthService{
     }
 
     /*
-            Будет вызывать загрузчик классов
-             */
+     Будет вызывать загрузчик классов
+    */
     public void connect() throws Exception {
         Class.forName("org.sqlite.JDBC");  //позволяет по имени класса загружать его в память
         connection = DriverManager.getConnection("jdbc:sqLite:MagicChat.db"); //url или путь в зависимости от типа базы

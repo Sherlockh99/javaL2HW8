@@ -81,7 +81,7 @@ public class MySQLAuthService implements AuthService{
             if (rs.next()) {
                 return false;
             }
-            
+
             psUpdateNickname.setString(1,nickname);
             psUpdateNickname.setString(2,login);
             psUpdateNickname.executeUpdate();

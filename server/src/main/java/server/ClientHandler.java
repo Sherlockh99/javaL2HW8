@@ -92,6 +92,20 @@ public class ClientHandler {
                                 }
                                 server.privateMsg(this, token[1], token[2]);
                             }
+                            if(str.startsWith(ServiceMessages.CHANGE_NICKNAME)){
+                                String[] token = str.split(" ", 3);
+                                if (token.length < 3) {
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_NO);
+                                    continue;
+                                }
+                                if(server.getAuthService().changeNickname(token[1],token[2])){
+                                    nickname = token[2];
+                                    server.broadcastClientList();
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_OK);
+                                }else{
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_NO);
+                                }
+                            }
 
                         } else {
                             server.broadcastMsg(this, str);

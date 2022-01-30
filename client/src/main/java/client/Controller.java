@@ -42,6 +42,10 @@ public class Controller implements Initializable {
     public HBox msgPanel;
     @FXML
     public ListView<String> clientList;
+    @FXML
+    public HBox userPanel;
+    @FXML
+    public TextField login;
 
     private Socket socket;
     private DataInputStream in;
@@ -51,12 +55,16 @@ public class Controller implements Initializable {
     private final int PORT = 8189;
 
     private boolean authenticated;
+    private String loginUser;
     private String nickname;
     private Stage stage;
     private Stage regStage;
+    private Stage settingsStage;
     private RegController regController;
+    private UserSettingsController userSettingsController;
 
     public void setAuthenticated(boolean authenticated) {
+
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
         authPanel.setManaged(!authenticated);
@@ -64,13 +72,19 @@ public class Controller implements Initializable {
         msgPanel.setManaged(authenticated);
         clientList.setVisible(authenticated);
         clientList.setManaged(authenticated);
+        userPanel.setVisible(authenticated);
+        userPanel.setManaged(authenticated);
 
         if (!authenticated) {
             nickname = "";
+            loginField.setText("");
         }
 
         setTitle(nickname);
         textArea.clear();
+        loginUser = loginField.getText();
+        login.setText(nickname);
+
     }
 
     @Override
@@ -140,7 +154,9 @@ public class Controller implements Initializable {
                                     }
                                 });
                             }
-
+                            if(str.startsWith(ServiceMessages.CHANGE_NICKNAME)){
+                                userSettingsController.regStatus(str);
+                            }
                         } else {
                             textArea.appendText(str + "\n");
                         }
@@ -182,6 +198,7 @@ public class Controller implements Initializable {
         }
 
         try {
+            //loginUser = loginField.getText().trim();
             String msg = String.format("%s %s %s", ServiceMessages.AUTH,
                     loginField.getText().trim(), passwordField.getText().trim());
             out.writeUTF(msg);
@@ -219,6 +236,7 @@ public class Controller implements Initializable {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reg.fxml"));
             Parent root = fxmlLoader.load();
+
             regStage = new Stage();
             regStage.setTitle("Magic chat registration");
             regStage.setScene(new Scene(root, 500, 425));
@@ -244,5 +262,50 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateNickname(String login, String nickname){
+        if (socket == null || socket.isClosed()) {
+            connect();
+        }
+        String msg = String.format(ServiceMessages.CHANGE_NICKNAME + " %s %s", login, nickname);
+        try {
+            out.writeUTF(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clickBtnSettings(ActionEvent actionEvent) {
+        if (settingsStage == null) {
+            createSettingStageWindow();
+        }
+        settingsStage.show();
+    }
+
+    private void createSettingStageWindow(){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/userSettings.fxml"));
+            Parent root = fxmlLoader.load();
+
+            settingsStage = new Stage();
+            settingsStage.setTitle("Magic chat settings");
+            settingsStage.setScene(new Scene(root, 500, 425));
+
+            settingsStage.initModality(Modality.APPLICATION_MODAL);
+            settingsStage.initStyle(StageStyle.UTILITY);
+
+            userSettingsController = fxmlLoader.getController();
+            userSettingsController.setController(this);
+            userSettingsController.setNickname(nickname);
+            userSettingsController.setLogin(loginUser);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void setLoginUser(String loginUser) {
+        this.loginUser = loginUser;
+        login.setText(loginUser);
     }
 }

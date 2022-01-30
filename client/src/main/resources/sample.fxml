@@ -19,6 +19,11 @@
         <Button text="Reg" onAction="#clickBtnReg"/>
     </HBox>
 
+    <HBox fx:id="userPanel" >
+        <TextField fx:id="login" HBox.hgrow="ALWAYS" promptText="login" editable="false"/>
+        <Button text="Settings" onAction="#clickBtnSettings"/>
+    </HBox>
+
     <HBox VBox.vgrow="ALWAYS">
         <TextArea fx:id="textArea" HBox.hgrow="ALWAYS" editable="false"/>
         <ListView fx:id="clientList" managed="false" visible="false" minWidth="100"

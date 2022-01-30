@@ -8,6 +8,8 @@ public class MySQLAuthService implements AuthService{
     private static PreparedStatement psInsert;
     private static PreparedStatement psSelectLoginWithSelectionLogin;
     private static PreparedStatement psSelectWithSelectionLogin;
+    private static PreparedStatement psUpdateNickname;
+    private static PreparedStatement psSelectUser;
 
     public MySQLAuthService(){
         try {
@@ -15,6 +17,8 @@ public class MySQLAuthService implements AuthService{
             psInsert = connection.prepareStatement("INSERT INTO users (login, password, nickname) VALUES ( ? , ? , ?);");
             psSelectLoginWithSelectionLogin = connection.prepareStatement("SELECT  login FROM users WHERE login = ? OR nickname = ?;");
             psSelectWithSelectionLogin = connection.prepareStatement("SELECT login, password, nickname FROM users WHERE login = ?;");
+            psSelectUser = connection.prepareStatement("SELECT login, nickname FROM users WHERE nickname = ?;");
+            psUpdateNickname = connection.prepareStatement("UPDATE users SET nickname = ? WHERE login = ?;");
 
             //psSelectWithSelectionLogin = connection.prepareStatement("SELECT login, password, nickname FROM users WHERE login = ?;");
         } catch (Exception e) {
@@ -68,9 +72,30 @@ public class MySQLAuthService implements AuthService{
         }
     }
 
+    @Override
+    public boolean changeNickname(String login, String nickname) {
+        try{
+
+            psSelectUser.setString(1,nickname);
+            ResultSet rs = psSelectLoginWithSelectionLogin.executeQuery();
+            if (rs.next()) {
+                return false;
+            }
+            
+            psUpdateNickname.setString(1,nickname);
+            psUpdateNickname.setString(2,login);
+            psUpdateNickname.executeUpdate();
+            return true;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     /*
-        Будет вызывать загрузчик классов
-         */
+            Будет вызывать загрузчик классов
+             */
     public void connect() throws Exception {
         Class.forName("org.sqlite.JDBC");  //позволяет по имени класса загружать его в память
         connection = DriverManager.getConnection("jdbc:sqLite:MagicChat.db"); //url или путь в зависимости от типа базы

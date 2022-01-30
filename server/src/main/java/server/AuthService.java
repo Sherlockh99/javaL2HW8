@@ -13,7 +13,7 @@ public interface AuthService {
      * иначе вернет false
      * */
     boolean registration(String login, String password, String nickname);
-
+    boolean changeNickname(String login, String nickname);
     default void disconnect() {
 
     }

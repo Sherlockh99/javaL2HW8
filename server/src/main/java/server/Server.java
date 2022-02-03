@@ -1,15 +1,8 @@
 package server;
-
-import org.omg.CORBA.PUBLIC_MEMBER;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
@@ -22,7 +15,8 @@ public class Server {
 
     public Server() {
         clients = new CopyOnWriteArrayList<>();
-        authService = new SimpleAuthService();
+        //authService = new SimpleAuthService();
+        authService = new MySQLAuthService();
 
         try {
             server = new ServerSocket(PORT);
@@ -39,6 +33,7 @@ public class Server {
             System.out.println("Server stop");
             try {
                 server.close();
+                authService.disconnect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -102,4 +97,6 @@ public class Server {
     public AuthService getAuthService() {
         return authService;
     }
+
+
 }

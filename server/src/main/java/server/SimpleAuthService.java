@@ -62,7 +62,7 @@ public class SimpleAuthService implements AuthService {
     }
 
     @Override
-    public boolean changeNickname(String login, String nickname) {
+    public boolean changeNick(String login, String nickname) {
         for (int i = 0; i <users.size() ; i++) {
             UserData user = users.get(i);
             if(user.getLogin().equals(login)){

@@ -93,20 +93,31 @@ public class ClientHandler {
                                 server.privateMsg(this, token[1], token[2]);
                             }
                             if(str.startsWith(ServiceMessages.CHANGE_NICKNAME)){
-                                String[] token = str.split(" ", 3);
+                                /*String[] token = str.split(" ", 3);
                                 if (token.length < 3) {
                                     sendMsg(ServiceMessages.CHANGE_NICKNAME_NO);
                                     continue;
                                 }
-                                if(server.getAuthService().changeNickname(token[1],token[2])){
-                                    nickname = token[2];
-                                    server.broadcastClientList();
-                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_OK);
-                                }else{
+                                */
+
+                                String[] token = str.split(" ", 2);
+                                if (token.length < 2) {
                                     sendMsg(ServiceMessages.CHANGE_NICKNAME_NO);
+                                    continue;
+                                }
+                                if (token[1].contains(" ")) {
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_NO + "; Ник не может содержать пробелов");
+                                    continue;
+                                }
+                                if(server.getAuthService().changeNick(this.nickname,token[1])){
+                                    //sendMsg("Ваш ник изменен на " + token[1]);
+                                    this.nickname = token[1];
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_OK + "; Ваш ник изменен на " + token[1]);
+                                    server.broadcastClientList();
+                                }else{
+                                    sendMsg(ServiceMessages.CHANGE_NICKNAME_NO + "; Не удалось изменить ник. Ник " + token[1] + " уже существует");
                                 }
                             }
-
                         } else {
                             server.broadcastMsg(this, str);
                         }

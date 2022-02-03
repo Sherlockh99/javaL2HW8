@@ -264,11 +264,11 @@ public class Controller implements Initializable {
         }
     }
 
-    public void updateNickname(String login, String nickname){
+    public void updateNickname(String newNickname){
         if (socket == null || socket.isClosed()) {
             connect();
         }
-        String msg = String.format(ServiceMessages.CHANGE_NICKNAME + " %s %s", login, nickname);
+        String msg = String.format(ServiceMessages.CHANGE_NICKNAME + " %s", newNickname);
         try {
             out.writeUTF(msg);
         } catch (IOException e) {

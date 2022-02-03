@@ -65,7 +65,7 @@ public class MySQLAuthService implements AuthService{
     }
 
     @Override
-    public boolean changeNickname(String login, String nickname) {
+    public boolean changeNick(String login, String nickname) {
         try{
 
             psSelectUser.setString(1,nickname);

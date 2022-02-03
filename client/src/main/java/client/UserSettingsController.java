@@ -39,16 +39,18 @@ public class UserSettingsController {
         if(nickname.equals(nicknameField.getText())){
             return;
         }
-        controller.updateNickname(login, nicknameField.getText());
+        controller.updateNickname(nicknameField.getText());
     }
 
     public void regStatus(String result) {
-        if (result.equals(ServiceMessages.CHANGE_NICKNAME_OK)) {
+        if (result.startsWith(ServiceMessages.CHANGE_NICKNAME_OK)) {
             textArea.appendText("Изменение никнейма прошло успешно\n");
             controller.setLoginUser(nicknameField.getText());
             nickname = nicknameField.getText();
+
         } else {
             textArea.appendText("Изменение не получилось. Никнейм занят\n");
         }
+        //textArea.appendText(result+"\n");
     }
 }

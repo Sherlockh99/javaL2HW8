@@ -20,11 +20,13 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import service.ServiceMessages;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -62,8 +64,11 @@ public class Controller implements Initializable {
     private Stage settingsStage;
     private RegController regController;
     private UserSettingsController userSettingsController;
+    //private FileOutputStream fileOut;
+    private FileWriter fileWriter;
+    String pathName;
 
-    public void setAuthenticated(boolean authenticated) {
+    public void setAuthenticated(boolean authenticated){
 
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
@@ -78,10 +83,18 @@ public class Controller implements Initializable {
         if (!authenticated) {
             nickname = "";
             loginField.setText("");
+            textArea.clear();
+            closeFile();
+        }else{
+            try {
+                openFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         setTitle(nickname);
-        textArea.clear();
+
         loginUser = loginField.getText();
         login.setText(nickname);
 
@@ -104,6 +117,43 @@ public class Controller implements Initializable {
         });
         setAuthenticated(false);
     }
+
+    private void closeFile(){
+        if(fileWriter != null){
+            try {
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void openFile() throws IOException {
+
+        pathName = "client\\history_"+nickname+".txt";
+        File file = new File(pathName);
+        if(file.exists()){
+            try {
+                List<String> ss = Files.readAllLines(Paths.get(pathName));
+                int start = 1;
+                if(ss.size()>100){
+                    start = ss.size()-100;
+                }
+                for (int i = start; i < ss.size(); i++) {
+                    textArea.appendText(ss.get(i-1)+"\n");
+                }
+                //textArea.setText(Files.readAllLines(Paths.get(pathName)).toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //try {
+            fileWriter = new FileWriter(pathName,true);
+        //} catch (FileNotFoundException e) {
+        //    e.printStackTrace();
+        //}
+
+    }
+
 
     public void connect() {
         try {
@@ -159,6 +209,7 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(str + "\n");
+                            fileWriter.write((str + "\n"));
                         }
                     }
                 } catch (IOException e) {
@@ -166,6 +217,9 @@ public class Controller implements Initializable {
                 } finally {
                     try {
                         socket.close();
+                        if(fileWriter != null){
+                            fileWriter.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

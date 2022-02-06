@@ -9,7 +9,7 @@ import java.util.List;
 
 public class HistoryMy implements HistoryService{
     private FileWriter fileWriter;
-    
+
     private static String getHistoryFilenameByLogin(String login) {
         return "history/history_" + login + ".txt";
     }

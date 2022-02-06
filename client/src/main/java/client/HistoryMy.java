@@ -16,7 +16,11 @@ public class HistoryMy implements HistoryService{
 
     @Override
     public void start(String login) {
-
+        try {
+            fileWriter = new FileWriter(getHistoryFilenameByLogin(login),true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -55,6 +59,15 @@ public class HistoryMy implements HistoryService{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Override
+    public void writeLine(String msg){
+        try {
+            fileWriter.write((msg));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

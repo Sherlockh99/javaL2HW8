@@ -64,8 +64,6 @@ public class Controller implements Initializable {
     private Stage settingsStage;
     private RegController regController;
     private UserSettingsController userSettingsController;
-    //private FileOutputStream fileOut;
-    String pathName;
     private HistoryService historyService;
 
     public void setAuthenticated(boolean authenticated){
@@ -85,7 +83,6 @@ public class Controller implements Initializable {
             loginUser = "";
             loginField.setText("");
             textArea.clear();
-            closeFile();
             historyService.stop();
         }else{
             loginUser = loginField.getText();
@@ -115,16 +112,6 @@ public class Controller implements Initializable {
         });
         historyService = new History();
         setAuthenticated(false);
-    }
-
-    private void closeFile(){
-        if(fileWriter != null){
-            try {
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void connect() {
@@ -181,7 +168,7 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(str + "\n");
-                            fileWriter.write((str + "\n"));
+                            historyService.writeLine(str + "\n");
                         }
                     }
                 } catch (IOException e) {
@@ -189,9 +176,7 @@ public class Controller implements Initializable {
                 } finally {
                     try {
                         socket.close();
-                        if(fileWriter != null){
-                            fileWriter.close();
-                        }
+                        historyService.stop();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

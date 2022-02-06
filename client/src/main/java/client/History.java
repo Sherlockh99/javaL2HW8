@@ -30,8 +30,8 @@ public class History implements HistoryService{
         }
     }
 
-    public static void writeLine(String msg){
-        out.println(msg);
+    public void writeLine(String msg){
+        out.print(msg);
     }
 
     public String getLast100LinesOfHistory(String login){

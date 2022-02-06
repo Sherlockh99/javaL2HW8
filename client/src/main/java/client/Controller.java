@@ -65,8 +65,8 @@ public class Controller implements Initializable {
     private RegController regController;
     private UserSettingsController userSettingsController;
     //private FileOutputStream fileOut;
-    private FileWriter fileWriter;
     String pathName;
+    private HistoryService historyService;
 
     public void setAuthenticated(boolean authenticated){
 
@@ -82,20 +82,18 @@ public class Controller implements Initializable {
 
         if (!authenticated) {
             nickname = "";
+            loginUser = "";
             loginField.setText("");
             textArea.clear();
             closeFile();
+            historyService.stop();
         }else{
-            try {
-                openFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            loginUser = loginField.getText();
+            historyService.start(loginUser);
+            textArea.appendText(historyService.getLast100LinesOfHistory(loginUser));
         }
 
         setTitle(nickname);
-
-        loginUser = loginField.getText();
         login.setText(nickname);
 
     }
@@ -115,6 +113,7 @@ public class Controller implements Initializable {
                 }
             });
         });
+        historyService = new History();
         setAuthenticated(false);
     }
 
@@ -127,33 +126,6 @@ public class Controller implements Initializable {
             }
         }
     }
-    private void openFile() throws IOException {
-
-        pathName = "client\\history_"+nickname+".txt";
-        File file = new File(pathName);
-        if(file.exists()){
-            try {
-                List<String> ss = Files.readAllLines(Paths.get(pathName));
-                int start = 1;
-                if(ss.size()>100){
-                    start = ss.size()-100;
-                }
-                for (int i = start; i < ss.size(); i++) {
-                    textArea.appendText(ss.get(i-1)+"\n");
-                }
-                //textArea.setText(Files.readAllLines(Paths.get(pathName)).toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //try {
-            fileWriter = new FileWriter(pathName,true);
-        //} catch (FileNotFoundException e) {
-        //    e.printStackTrace();
-        //}
-
-    }
-
 
     public void connect() {
         try {

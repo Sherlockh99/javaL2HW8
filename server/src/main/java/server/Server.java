@@ -1,4 +1,5 @@
 package server;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,8 +7,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class Server {
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private ServerSocket server;
     private Socket socket;
     private final int PORT = 8189;
@@ -17,33 +22,47 @@ public class Server {
     private ExecutorService executorService;
 
     public Server() {
+        LogManager manager = LogManager.getLogManager();
+        try {
+            manager.readConfiguration(new FileInputStream("logging.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка чтения файла конфигурации логирования");
+        }
+
         executorService = Executors.newCachedThreadPool();
         clients = new CopyOnWriteArrayList<>();
         //authService = new SimpleAuthService();
         if(!SQLHandler.connect()){
+            logger.log(Level.SEVERE, "Не удалось подключиться к БД");
             throw new RuntimeException("Не удалось подключиться к БД");
         }
         //authService = new MySQLAuthService();
         authService = new DBAuthService();
         try {
             server = new ServerSocket(PORT);
-            System.out.println("Server started!");
+            logger.log(Level.INFO, "Server started!");
+            //System.out.println("Server started!");
 
             while (true) {
                 socket = server.accept();
-                System.out.println("Client connected: " + socket.getRemoteSocketAddress());
+                logger.log(Level.INFO, "Client connected: " + socket.getRemoteSocketAddress());
+                //System.out.println("Client connected: " + socket.getRemoteSocketAddress());
                 new ClientHandler(this, socket);
             }
         } catch (IOException e) {
+            logger.log(Level.SEVERE, e.toString());
             e.printStackTrace();
         } finally {
             executorService.shutdown();
             SQLHandler.disconnect();
-            System.out.println("Server stop");
+            logger.log(Level.INFO, "Server stop!");
+            //System.out.println("Server stop");
             try {
                 server.close();
                 authService.disconnect();
             } catch (IOException e) {
+                logger.log(Level.SEVERE, "Ошибка при остановке сервера: " + e.toString());
                 e.printStackTrace();
             }
         }

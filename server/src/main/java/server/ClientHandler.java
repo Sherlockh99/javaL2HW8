@@ -4,11 +4,16 @@ import service.ServiceMessages;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class ClientHandler {
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private Server server;
     private Socket socket;
     private DataInputStream in;
@@ -18,6 +23,14 @@ public class ClientHandler {
     private String login;
 
     public ClientHandler(Server server, Socket socket) {
+        LogManager manager = LogManager.getLogManager();
+        try {
+            manager.readConfiguration(new FileInputStream("logging.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка чтения файла конфигурации логирования");
+        }
+
         this.server = server;
         this.socket = socket;
 
@@ -52,12 +65,14 @@ public class ClientHandler {
                                     nickname = newNick;
                                     sendMsg(ServiceMessages.AUTH_OK + " " + nickname);
                                     server.subscribe(this);
-                                    System.out.println("Client: " + nickname + " authenticated");
+                                    //System.out.println("Client: " + nickname + " authenticated");
+                                    logger.log(Level.INFO, "Client: " + login + " - authenticated");
                                     break;
                                 } else {
                                     sendMsg("С этим логином уже зашли в чат");
                                 }
                             } else {
+                                logger.log(Level.WARNING, "Client: " + login + " - неверный логин / пароль!");
                                 sendMsg("Неверный логин / пароль");
                             }
                         }
@@ -129,7 +144,8 @@ public class ClientHandler {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    System.out.println("Client disconnect!");
+                    //System.out.println("Client disconnect!");
+                    logger.log(Level.INFO, "Client: " + login + " disconnect!");
                     server.unsubscribe(this);
                     try {
                         socket.close();
